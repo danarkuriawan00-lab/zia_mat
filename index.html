@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Asesmen SDN 1 Gondang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0284c7;
+            --secondary-blue: #93c5fd;
+            --accent-green: #10b981;
+            --bg-gray: #f3f4f6;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            max-height: 850px;
+            background-color: #ffffff;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            position: relative;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 640px) {
+            .app-container {
+                height: 90vh;
+                border-radius: 24px;
+            }
+        }
+
+        .font-sahabat {
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.1em;
+            background: linear-gradient(to bottom, #1e293b, #334155);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(1px 1px 0px rgba(255,255,255,0.3));
+        }
+
+        .btn-masuk {
+            background-color: var(--accent-green);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-masuk:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-nav {
+            background-color: var(--primary-blue);
+            border-radius: 12px;
+            color: white;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .option-item {
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #e5e7eb;
+            background-color: #f9fafb;
+        }
+
+        .selected-option {
+            background-color: #dbeafe !important;
+            border-color: #3b82f6 !important;
+            transform: translateX(8px);
+        }
+
+        #loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(4px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            color: white;
+        }
+
+        .input-field {
+            background-color: #ffffff;
+            color: #1e293b;
+            text-align: center;
+            font-weight: bold;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+            border: 2px solid #cbd5e1;
+            outline: none;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container p-6" id="app">
+    <div id="loading-overlay">
+        <div class="animate-spin rounded-full h-14 w-14 border-4 border-blue-400 border-t-transparent mb-4"></div>
+        <p class="font-bold text-lg">Memproses Data...</p>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="flex flex-col items-center justify-center h-full">
+        <div class="mb-6">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiUAgnz3M-C0b4aP4NCccOVpRTBjimetBgZhyphenhyphenkGcMIcG3YY7RhacnjOZFFonylLQGbQ0LQHR7n4cOk7XN8mDb9YmRrXgJi5q7yZCEEKpQ4CYuB9WaZLCNw35_qVPvcRTizOMvZXsYVqmAOSfxDv9bUmpB9z_-2G3ecR_C1CONgsQ5-5U5NA2B9rpU4zfJnZ/w200-h200/sdn%20gng%201.png" alt="Logo SDN 1 Gondang" class="w-28 h-28 object-contain">
+        </div>
+
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-gray-900 leading-tight uppercase">Selamat Datang</h1>
+            <h2 class="text-5xl font-black mb-2 font-sahabat uppercase">Sahabat</h2>
+            <p class="text-[10px] text-gray-600 font-medium tracking-widest uppercase text-center">
+                Sistem Asesmen Hasil Amanah Berprestasi Akurat & Terpercaya
+            </p>
+        </div>
+
+        <div class="w-full space-y-4">
+            <input type="text" id="name" placeholder="NAMA LENGKAP" class="input-field uppercase">
+            <input type="number" id="absen" placeholder="NOMOR ABSEN" class="input-field">
+            <button onclick="startExam()" class="w-full py-4 mt-2 rounded-xl btn-masuk text-white font-bold text-lg shadow-lg uppercase">
+                Mulai Ujian
+            </button>
+        </div>
+    </div>
+
+    <!-- Exam Screen -->
+    <div id="exam-screen" class="hidden flex flex-col h-full">
+        <div class="w-full bg-gray-200 rounded-full h-2 mb-6">
+            <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+
+        <div class="flex justify-between items-center mb-6">
+            <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase">
+                Soal <span id="current-number">1</span> / <span id="total-questions">0</span>
+            </span>
+            <span id="timer" class="text-gray-700 font-mono font-bold text-sm">00:00</span>
+        </div>
+        
+        <div class="flex-grow">
+            <div class="bg-blue-50 rounded-2xl p-5 mb-6 border-l-4 border-blue-600">
+                <p id="question-text" class="text-base font-bold text-gray-800 leading-relaxed">Memuat...</p>
+            </div>
+            <div id="options-container" class="space-y-3"></div>
+        </div>
+
+        <div class="flex justify-between items-center mt-6 pb-4 gap-3">
+            <button onclick="prevQuestion()" id="prev-btn" class="btn-nav flex-1 opacity-50" disabled>KEMBALI</button>
+            <button onclick="handleNext()" class="btn-nav flex-1" id="next-btn">LANJUT</button>
+        </div>
+    </div>
+</div>
+
+<div id="confirm-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 class="text-xl font-bold mb-2">Selesai?</h3>
+        <p class="text-sm text-gray-600 mb-6">Pastikan semua jawaban sudah terisi.</p>
+        <div class="flex gap-3">
+            <button onclick="hideConfirm()" class="flex-1 py-3 border border-gray-300 rounded-xl font-bold text-gray-500">BATAL</button>
+            <button onclick="finishExam()" class="flex-1 py-3 bg-green-500 text-white rounded-xl font-bold">KIRIM</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbz1sq6Ks2rC3lIdcA3i9TRLPebUdny0st73zmcZXI7HVVSZ63hxJWsz3_rVOH3L0gdO/exec'; 
+
+    const questions = [
+{ 
+    id: 1, 
+    text: "Bangun datar yang memiliki 4 sisi sama panjang dan 4 sudut lancip/siku adalah ....", 
+    options: [{id:'A', text:'Segitiga'}, {id:'B', text:'Persegi'}, {id:'C', text:'Lingkaran'}, {id:'D', text:'Layang-layang'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 2, 
+    text: "Benda yang memiliki permukaan berbentuk persegi panjang adalah ....", 
+    options: [{id:'A', text:'Koin'}, {id:'B', text:'Pintu kelas'}, {id:'C', text:'Dadu'}, {id:'D', text:'Roda'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 3, 
+    text: "Sisi pada bangun segitiga berjumlah ....", 
+    options: [{id:'A', text:'2'}, {id:'B', text:'3'}, {id:'C', text:'4'}, {id:'D', text:'5'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 4, 
+    text: "Bentuk permukaan jam dinding yang tidak memiliki pojok/sudut adalah ....", 
+    options: [{id:'A', text:'Segiempat'}, {id:'B', text:'Segitiga'}, {id:'C', text:'Lingkaran'}, {id:'D', text:'Trapesium'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 5, 
+    text: "Banyaknya titik sudut pada buku tulis adalah ....", 
+    options: [{id:'A', text:'2'}, {id:'B', text:'3'}, {id:'C', text:'4'}, {id:'D', text:'6'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 6, 
+    text: "Segitiga yang memiliki dua sisi yang sama panjang disebut segitiga ....", 
+    options: [{id:'A', text:'Sama sisi'}, {id:'B', text:'Sama kaki'}, {id:'C', text:'Siku-siku'}, {id:'D', text:'Sembarang'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 7, 
+    text: "Papan tulis di depan kelas berbentuk ....", 
+    options: [{id:'A', text:'Persegi'}, {id:'B', text:'Persegi Panjang'}, {id:'C', text:'Lingkaran'}, {id:'D', text:'Segitiga'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 8, 
+    text: "Bangun datar yang sisinya berupa satu garis lengkung adalah ....", 
+    options: [{id:'A', text:'Segitiga'}, {id:'B', text:'Lingkaran'}, {id:'C', text:'Persegi'}, {id:'D', text:'Balok'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 9, 
+    text: "Bingkai foto yang semua sisinya sama panjang berbentuk ....", 
+    options: [{id:'A', text:'Lingkaran'}, {id:'B', text:'Persegi panjang'}, {id:'C', text:'Persegi'}, {id:'D', text:'Kerucut'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 10, 
+    text: "Pertemuan antara dua garis pada bangun datar disebut ....", 
+    options: [{id:'A', text:'Sisi'}, {id:'B', text:'Sudut'}, {id:'C', text:'Isi'}, {id:'D', text:'Warna'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 11, 
+    text: "Potongan semangka yang berbentuk segitiga memiliki sudut sebanyak ....", 
+    options: [{id:'A', text:'2'}, {id:'B', text:'3'}, {id:'C', text:'4'}, {id:'D', text:'1'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 12, 
+    text: "Benda yang permukaannya berbentuk segiempat adalah ....", 
+    options: [{id:'A', text:'Topi'}, {id:'B', text:'Ubin/Lantai'}, {id:'C', text:'Gelas'}, {id:'D', text:'Bola'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 13, 
+    text: "Garis lurus yang membentuk bangun datar disebut ....", 
+    options: [{id:'A', text:'Titik'}, {id:'B', text:'Sudut'}, {id:'C', text:'Sisi'}, {id:'D', text:'Pojok'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 14, 
+    text: "Hanger baju (gantungan) seringkali berbentuk ....", 
+    options: [{id:'A', text:'Persegi'}, {id:'B', text:'Segitiga'}, {id:'C', text:'Lingkaran'}, {id:'D', text:'Tabung'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 15, 
+    text: "Bangun datar persegi panjang memiliki sisi sebanyak ....", 
+    options: [{id:'A', text:'2'}, {id:'B', text:'3'}, {id:'C', text:'4'}, {id:'D', text:'5'}], 
+    correct: 'C' 
+  },
+
+  // --- BANGUN RUANG (16-30) ---
+  { 
+    id: 16, 
+    text: "Bangun ruang yang bentuknya seperti kotak tisu adalah ....", 
+    options: [{id:'A', text:'Kubus'}, {id:'B', text:'Balok'}, {id:'C', text:'Bola'}, {id:'D', text:'Kerucut'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 17, 
+    text: "Benda yang berbentuk kubus adalah ....", 
+    options: [{id:'A', text:'Lemari'}, {id:'B', text:'Rubik'}, {id:'C', text:'Baterai'}, {id:'D', text:'Semangka'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 18, 
+    text: "Bangun ruang yang alas dan tutupnya berbentuk lingkaran adalah ....", 
+    options: [{id:'A', text:'Balok'}, {id:'B', text:'Kerucut'}, {id:'C', text:'Tabung'}, {id:'D', text:'Kubus'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 19, 
+    text: "Bola adalah bangun ruang yang memiliki ... sisi.", 
+    options: [{id:'A', text:'1'}, {id:'B', text:'2'}, {id:'C', text:'3'}, {id:'D', text:'4'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 20, 
+    text: "Es krim cone (wadah es krim) memiliki bentuk bangun ruang ....", 
+    options: [{id:'A', text:'Tabung'}, {id:'B', text:'Limas'}, {id:'C', text:'Kerucut'}, {id:'D', text:'Bola'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 21, 
+    text: "Kubus memiliki sisi yang semuanya berbentuk ....", 
+    options: [{id:'A', text:'Persegi Panjang'}, {id:'B', text:'Persegi'}, {id:'C', text:'Segitiga'}, {id:'D', text:'Lingkaran'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 22, 
+    text: "Jumlah titik sudut pada kubus adalah ....", 
+    options: [{id:'A', text:'4'}, {id:'B', text:'6'}, {id:'C', text:'8'}, {id:'D', text:'12'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 23, 
+    text: "Benda yang berbentuk tabung di dapur adalah ....", 
+    options: [{id:'A', text:'Gelas'}, {id:'B', text:'Piring'}, {id:'C', text:'Serbet'}, {id:'D', text:'Meja'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 24, 
+    text: "Rusuk pada balok berjumlah ....", 
+    options: [{id:'A', text:'6'}, {id:'B', text:'8'}, {id:'C', text:'10'}, {id:'D', text:'12'}], 
+    correct: 'D' 
+  },
+  { 
+    id: 25, 
+    text: "Bentuk buah melon hampir sama dengan bangun ruang ....", 
+    options: [{id:'A', text:'Bola'}, {id:'B', text:'Tabung'}, {id:'C', text:'Kerucut'}, {id:'D', text:'Kubus'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 26, 
+    text: "Bangun ruang yang memiliki satu titik puncak runcing adalah ....", 
+    options: [{id:'A', text:'Balok'}, {id:'B', text:'Tabung'}, {id:'C', text:'Kerucut'}, {id:'D', text:'Bola'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 27, 
+    text: "Sisi tegak pada balok berjumlah ... pasang.", 
+    options: [{id:'A', text:'1'}, {id:'B', text:'2'}, {id:'C', text:'3'}, {id:'D', text:'4'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 28, 
+    text: "Pipa air adalah contoh benda berbentuk ....", 
+    options: [{id:'A', text:'Kerucut'}, {id:'B', text:'Bola'}, {id:'C', text:'Tabung'}, {id:'D', text:'Balok'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 29, 
+    text: "Berapa jumlah sisi pada kubus?", 
+    options: [{id:'A', text:'4'}, {id:'B', text:'6'}, {id:'C', text:'8'}, {id:'D', text:'12'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 30, 
+    text: "Kotak kado yang alasnya persegi dan tingginya sama disebut ....", 
+    options: [{id:'A', text:'Kubus'}, {id:'B', text:'Balok'}, {id:'C', text:'Tabung'}, {id:'D', text:'Kerucut'}], 
+    correct: 'A' 
+  },
+
+  // --- POSISI BENDA (31-40) ---
+  { 
+    id: 31, 
+    text: "Sepatu terletak di ... rak agar tidak kotor.", 
+    options: [{id:'A', text:'Dalam'}, {id:'B', text:'Luar'}, {id:'C', text:'Atas'}, {id:'D', text:'Bawah'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 32, 
+    text: "Jika kamu duduk di kursi, maka kursi ada di ... kamu.", 
+    options: [{id:'A', text:'Atas'}, {id:'B', text:'Bawah'}, {id:'C', text:'Samping'}, {id:'D', text:'Depan'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 33, 
+    text: "Pesawat terbang melintas di ... rumah kita.", 
+    options: [{id:'A', text:'Bawah'}, {id:'B', text:'Samping'}, {id:'C', text:'Atas'}, {id:'D', text:'Depan'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 34, 
+    text: "Adik duduk di ... Ayah dan Ibu.", 
+    options: [{id:'A', text:'Samping'}, {id:'B', text:'Belakang'}, {id:'C', text:'Antara'}, {id:'D', text:'Atas'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 35, 
+    text: "Halaman sekolah ada di ... bangunan sekolah.", 
+    options: [{id:'A', text:'Dalam'}, {id:'B', text:'Luar/Depan'}, {id:'C', text:'Atas'}, {id:'D', text:'Bawah'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 36, 
+    text: "Kunci pintu biasanya menggantung di ... pintu.", 
+    options: [{id:'A', text:'Atas'}, {id:'B', text:'Bawah'}, {id:'C', text:'Tengah'}, {id:'D', text:'Luar'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 37, 
+    text: "Beni berdiri di ... tiang bendera saat upacara.", 
+    options: [{id:'A', text:'Atas'}, {id:'B', text:'Bawah'}, {id:'C', text:'Depan'}, {id:'D', text:'Dalam'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 38, 
+    text: "Ibu menaruh keset di ... pintu kamar mandi.", 
+    options: [{id:'A', text:'Atas'}, {id:'B', text:'Depan'}, {id:'C', text:'Dalam'}, {id:'D', text:'Belakang'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 39, 
+    text: "Lawan kata dari 'Depan' adalah ....", 
+    options: [{id:'A', text:'Atas'}, {id:'B', text:'Samping'}, {id:'C', text:'Belakang'}, {id:'D', text:'Kiri'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 40, 
+    text: "Ikan hias itu berada di ... akuarium.", 
+    options: [{id:'A', text:'Luar'}, {id:'B', text:'Atas'}, {id:'C', text:'Dalam'}, {id:'D', text:'Bawah'}], 
+    correct: 'C' 
+  },
+
+  // --- POLA (41-50) ---
+  { 
+    id: 41, 
+    text: "Pola: Merah, Biru, Hijau, Merah, Biru, ....", 
+    options: [{id:'A', text:'Merah'}, {id:'B', text:'Kuning'}, {id:'C', text:'Hijau'}, {id:'D', text:'Ungu'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 42, 
+    text: "Pola Bilangan: 1, 4, 7, 10, .... (Pola loncat 3)", 
+    options: [{id:'A', text:'11'}, {id:'B', text:'12'}, {id:'C', text:'13'}, {id:'D', text:'14'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 43, 
+    text: "Pola Bangun: Kotak, Bulat, Kotak, Bulat, ....", 
+    options: [{id:'A', text:'Segitiga'}, {id:'B', text:'Kotak'}, {id:'C', text:'Bulat'}, {id:'D', text:'Trapesium'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 44, 
+    text: "Lengkapi: 2, 4, 2, 4, 2, ....", 
+    options: [{id:'A', text:'1'}, {id:'B', text:'2'}, {id:'C', text:'3'}, {id:'D', text:'4'}], 
+    correct: 'D' 
+  },
+  { 
+    id: 45, 
+    text: "Pola benda: Garpu, Sendok, Garpu, Sendok, ....", 
+    options: [{id:'A', text:'Piring'}, {id:'B', text:'Garpu'}, {id:'C', text:'Sendok'}, {id:'D', text:'Gelas'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 46, 
+    text: "Pola: Tinggi, Rendah, Tinggi, Rendah, ....", 
+    options: [{id:'A', text:'Tinggi'}, {id:'B', text:'Sama'}, {id:'C', text:'Rendah'}, {id:'D', text:'Sangat Tinggi'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 47, 
+    text: "Pola Bilangan: 20, 18, 16, 14, .... (Pola mundur 2)", 
+    options: [{id:'A', text:'13'}, {id:'B', text:'12'}, {id:'C', text:'11'}, {id:'D', text:'10'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 48, 
+    text: "Pola Suara: Prok, Dor, Prok, Dor, ....", 
+    options: [{id:'A', text:'Boom'}, {id:'B', text:'Dor'}, {id:'C', text:'Prok'}, {id:'D', text:'Sst'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 49, 
+    text: "Pola: Segitiga, Segitiga, Lingkaran, Segitiga, Segitiga, ....", 
+    options: [{id:'A', text:'Persegi'}, {id:'B', text:'Lingkaran'}, {id:'C', text:'Segitiga'}, {id:'D', text:'Bintang'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 50, 
+    text: "Pola: 5, 10, 5, 10, ....", 
+    options: [{id:'A', text:'15'}, {id:'B', text:'5'}, {id:'C', text:'10'}, {id:'D', text:'20'}], 
+    correct: 'B' 
+  }
+    ];
+
+    let currentQuestionIndex = 0;
+    let userAnswers = {};
+    let userData = { name: '', absen: '' };
+    let startTime;
+    let timerInterval;
+
+    function startExam() {
+        userData.name = document.getElementById('name').value.trim();
+        userData.absen = document.getElementById('absen').value.trim();
+
+        if (!userData.name || !userData.absen) {
+            alert("Isi Nama dan Absen!");
+            return;
+        }
+
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('exam-screen').classList.remove('hidden');
+        document.getElementById('total-questions').innerText = questions.length;
+        
+        startTime = new Date();
+        timerInterval = setInterval(updateTimer, 1000);
+        renderQuestion();
+    }
+
+    function updateTimer() {
+        const diff = Math.floor((new Date() - startTime) / 1000);
+        const m = Math.floor(diff / 60).toString().padStart(2, '0');
+        const s = (diff % 60).toString().padStart(2, '0');
+        document.getElementById('timer').innerText = `${m}:${s}`;
+    }
+
+    function renderQuestion() {
+        const q = questions[currentQuestionIndex];
+        document.getElementById('current-number').innerText = currentQuestionIndex + 1;
+        document.getElementById('question-text').innerText = q.text;
+        document.getElementById('progress-bar').style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.options.forEach(opt => {
+            const isSelected = userAnswers[currentQuestionIndex] === opt.id;
+            const div = document.createElement('div');
+            div.className = `option-item p-4 rounded-xl font-medium flex items-center shadow-sm ${isSelected ? 'selected-option' : ''}`;
+            div.innerHTML = `
+                <div class="w-7 h-7 rounded-full flex items-center justify-center mr-3 text-xs font-bold ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}">
+                    ${opt.id}
+                </div>
+                <span class="text-sm">${opt.text}</span>
+            `;
+            div.onclick = () => { 
+                userAnswers[currentQuestionIndex] = opt.id; 
+                renderQuestion(); 
+            };
+            container.appendChild(div);
+        });
+
+        document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+        document.getElementById('prev-btn').style.opacity = currentQuestionIndex === 0 ? '0.5' : '1';
+        document.getElementById('next-btn').innerText = currentQuestionIndex === questions.length - 1 ? "SELESAI" : "LANJUT";
+    }
+
+    function handleNext() {
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            renderQuestion();
+        } else {
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            renderQuestion();
+        }
+    }
+
+    function hideConfirm() { 
+        document.getElementById('confirm-modal').style.display = 'none'; 
+    }
+
+    async function finishExam() {
+        hideConfirm();
+        clearInterval(timerInterval);
+        document.getElementById('loading-overlay').style.display = 'flex';
+
+        let correct = 0;
+        questions.forEach((q, i) => { if (userAnswers[i] === q.correct) correct++; });
+        const score = Math.round((correct / questions.length) * 100);
+
+        const payload = new URLSearchParams();
+        payload.append('timestamp', new Date().toLocaleString());
+        payload.append('nama', userData.name);
+        payload.append('absen', userData.absen);
+        payload.append('skor', score);
+        payload.append('durasi', document.getElementById('timer').innerText);
+
+        try {
+            await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: payload });
+            showResult(score, correct);
+        } catch (e) {
+            showResult(score, correct);
+        } finally {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+    }
+
+    function showResult(score, correct) {
+        document.getElementById('exam-screen').innerHTML = `
+            <div class="flex flex-col items-center justify-center text-center h-full py-6">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h1 class="text-xl font-black mb-1">UJIAN SELESAI</h1>
+                <p class="text-xs text-gray-500 mb-6">${userData.name} - Absen ${userData.absen}</p>
+                
+                <div class="text-6xl font-black text-blue-600 mb-6">${score}</div>
+
+                <div class="grid grid-cols-2 gap-3 w-full mb-6">
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <div class="text-[10px] text-gray-400">Benar</div>
+                        <div class="text-lg font-bold text-green-600">${correct}</div>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <div class="text-[10px] text-gray-400">Salah</div>
+                        <div class="text-lg font-bold text-red-500">${questions.length - correct}</div>
+                    </div>
+                </div>
+
+                <button onclick="location.reload()" class="btn-nav w-full py-3 uppercase">Kembali</button>
+            </div>
+        `;
+    }
+</script>
+</body>
+</html>
